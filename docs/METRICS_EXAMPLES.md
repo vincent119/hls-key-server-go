@@ -8,7 +8,7 @@
 ./bin/server
 ```
 
-1. 訪問 metrics endpoint（需要 basic auth）：
+2. 訪問 metrics endpoint（需要 basic auth）：
 
 ```bash
 curl -u admin:sshhsuuwgwhysgs http://localhost:9090/api/v1/metrics

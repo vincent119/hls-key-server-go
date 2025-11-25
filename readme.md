@@ -26,38 +26,63 @@ hls-key-server-go/
 │       └── main.go          # 依賴注入與啟動邏輯
 ├── internal/
 │   ├── apperrors/           # Sentinel errors 定義
-│   │   └── errors.go
+│   │   ├── errors.go
+│   │   └── errors_test.go
 │   ├── configs/             # 配置載入與驗證
 │   │   ├── initConfig.go
 │   │   ├── jwt.go
 │   │   └── version.go
 │   ├── handler/             # HTTP 請求處理層
 │   │   ├── auth_handler.go
+│   │   ├── auth_handler_test.go
 │   │   ├── hls_handler.go
-│   │   ├── *_test.go        # HTTP 整合測試
+│   │   ├── hls_handler_test.go
+│   │   ├── metrics_handler.go
+│   │   ├── metrics_handler_test.go
 │   │   └── middleware/
+│   │       ├── cros.go
+│   │       ├── logger.go
+│   │       └── prometheus.go
 │   ├── service/             # 業務邏輯層
 │   │   ├── auth.go          # JWT 認證服務
+│   │   ├── auth_test.go
 │   │   ├── hls.go           # HLS 金鑰服務
-│   │   └── *_test.go
+│   │   └── hls_test.go
 │   ├── repository/          # 資料存取層
 │   │   ├── key.go           # 檔案系統金鑰儲存
-│   │   └── *_test.go
+│   │   └── key_test.go
 │   ├── routes/              # 路由註冊
+│   │   ├── helthCheck.go
 │   │   └── api/v1/
+│   │       ├── authToken.go
+│   │       ├── hlsKey.go
+│   │       ├── metrics.go
+│   │       └── rootRoute.go
 │   └── pkg/
-│       └── logger/          # Logger 工廠
+│       ├── logger/          # Logger 工廠
+│       │   └── logger.go
+│       └── metrics/         # Prometheus 指標
+│           └── metrics.go
 ├── config/                  # 配置檔案
 │   └── config.yaml
 ├── keys/                    # HLS 加密金鑰目錄
-├── docs/                    # Swagger 文件
+├── docs/                    # API 文件
 │   ├── docs.go
 │   ├── swagger.json
-│   └── swagger.yaml
+│   ├── swagger.yaml
+│   ├── METRICS.md           # Prometheus 指標文件
+│   └── METRICS_EXAMPLES.md  # 指標使用範例
+├── .github/
+│   └── instructions/        # Copilot 開發規範
+│       └── go.instructions.md
 ├── Makefile                 # 開發工具命令
 ├── .golangci.yml            # Linter 配置
 ├── .gitignore
+├── dockerfile               # Docker 建置檔
 ├── ARCHITECTURE.md          # 架構文件
+├── CONTRIBUTING.md          # 貢獻指南
+├── SECURITY.md              # 安全政策
+├── OPTIMIZATION_REPORT.md  # 效能優化報告
 └── README.md
 ```
 

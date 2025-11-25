@@ -1,0 +1,22 @@
+version: "2"
+
+run:
+  timeout: 5m
+  go: "1.24"
+
+linters:
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+  settings:
+    errcheck:
+      exclude-functions:
+        - (io.Closer).Close
+        - (*go.uber.org/zap.Logger).Sync
+
+issues:
+  max-issues-per-linter: 50
+  max-same-issues: 3

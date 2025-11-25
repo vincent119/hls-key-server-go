@@ -3,11 +3,13 @@
 ## 快速啟動
 
 1. 啟動服務器：
+
 ```bash
 ./bin/server
 ```
 
-2. 訪問 metrics endpoint（需要 basic auth）：
+1. 訪問 metrics endpoint（需要 basic auth）：
+
 ```bash
 curl -u admin:sshhsuuwgwhysgs http://localhost:9090/api/v1/metrics
 ```
@@ -93,6 +95,7 @@ hls_server_uptime_seconds 86400
 ## Prometheus 查詢範例
 
 ### 計算請求成功率
+
 ```promql
 sum(rate(hls_http_requests_total{status="200"}[5m]))
 /
@@ -100,6 +103,7 @@ sum(rate(hls_http_requests_total[5m])) * 100
 ```
 
 ### 平均請求延遲
+
 ```promql
 rate(hls_http_request_duration_seconds_sum[5m])
 /
@@ -107,11 +111,13 @@ rate(hls_http_request_duration_seconds_count[5m])
 ```
 
 ### 錯誤率
+
 ```promql
 sum(rate(hls_errors_total[5m]))
 ```
 
 ### 認證成功率
+
 ```promql
 sum(rate(hls_auth_attempts_total{result="success"}[5m]))
 /
@@ -119,6 +125,7 @@ sum(rate(hls_auth_attempts_total[5m])) * 100
 ```
 
 ### 密鑰請求 QPS
+
 ```promql
 sum(rate(hls_key_requests_total{status="success"}[1m]))
 ```

@@ -1,10 +1,12 @@
+// Package configs handles application configuration loading and management
 package configs
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"log"
 )
 
 // 設定命令行標誌 (flags)，允許指定配置文件路徑
@@ -12,7 +14,7 @@ var (
 	configFile = pflag.StringP("config", "c", "", "Path to configuration file")
 )
 
-// 應用配置結構\
+// AppConf defines application configuration settings
 // @Summary App configuration
 // @Description App configuration
 // @Tags App
@@ -28,7 +30,7 @@ type AppConf struct {
 	Salt    string `mapstructure:"salt"`
 }
 
-// metric user and password
+// Metric defines Prometheus metric authentication configuration
 // @Summary Metric configuration
 // @Description Metric configuration
 // @Tags Metric
@@ -44,10 +46,52 @@ type Config struct {
 	JwtSecret JwtSecret `mapstructure:"jwt"`
 }
 
-// 存儲全局配置
+// Conf stores the global application configuration
 var Conf Config
 
-// Init 初始化配置
+// LoadConfig loads configuration from file or defaults
+// Returns a Config instance instead of using global variable
+func LoadConfig() (*Config, error) {
+	// Parse command line arguments
+	pflag.Parse()
+
+	// Create new Viper instance
+	v := viper.New()
+	setDefaults(v)
+	v.AutomaticEnv()
+
+	// Set config file
+	if *configFile != "" {
+		v.SetConfigFile(*configFile)
+	} else {
+		v.SetConfigName("config")
+		v.AddConfigPath("./config")
+		v.AddConfigPath(".")
+	}
+	v.SetConfigType("yaml")
+
+	// Read config
+	if err := v.ReadInConfig(); err != nil {
+		return nil, fmt.Errorf("read config file: %w", err)
+	}
+
+	var cfg Config
+	if err := v.Unmarshal(&cfg); err != nil {
+		return nil, fmt.Errorf("unmarshal config: %w", err)
+	}
+
+	// Also set global variable for backward compatibility
+	Conf = cfg
+
+	if v.ConfigFileUsed() != "" {
+		fmt.Printf("成功加載配置: %s\n", v.ConfigFileUsed())
+	}
+
+	return &cfg, nil
+}
+
+// Init initializes configuration (deprecated: use LoadConfig instead)
+// Kept for backward compatibility
 func Init() {
 	// 解析命令行參數
 	pflag.Parse()

@@ -1,4 +1,4 @@
-basePath: /
+basePath: /api/v1
 definitions:
   routes.ResponseHealthCheck:
     properties:
@@ -9,10 +9,17 @@ definitions:
       recv_time_utc:
         type: string
     type: object
-host: localhost:9090
+host: localhost:8080
 info:
-  contact: {}
-  description: This is the API documentation for HLS Key Server.
+  contact:
+    email: support@example.com
+    name: API Support
+    url: https://github.com/vincent119/hls-key-server-go
+  description: RESTful API for HLS encryption key management with JWT authentication
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
   title: HLS Key Server API
   version: "1.0"
 paths:
@@ -56,6 +63,88 @@ paths:
       summary: Generate auth token
       tags:
       - Auth
+  /api/v1/hls/key:
+    post:
+      consumes:
+      - application/json
+      description: Retrieves an HLS encryption key by name
+      parameters:
+      - description: 'Key name (default: stream.key)'
+        in: query
+        name: key
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: Encryption key
+          schema:
+            type: file
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Key not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get encryption key
+      tags:
+      - HLS
+  /api/v1/hls/keys:
+    get:
+      description: Lists all available encryption keys
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of keys
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List all keys
+      tags:
+      - HLS
+  /api/v1/hls/reload:
+    post:
+      description: Reloads all encryption keys from the filesystem
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Reload status
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Reload keys
+      tags:
+      - HLS
   /healthz:
     get:
       description: Returns OK if the service is healthy
@@ -67,4 +156,11 @@ paths:
       summary: Check health status
       tags:
       - health
+securityDefinitions:
+  BearerAuth:
+    description: 'JWT Authorization header using the Bearer scheme. Example: "Bearer
+      {token}"'
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

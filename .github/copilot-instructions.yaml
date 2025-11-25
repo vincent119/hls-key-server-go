@@ -1,0 +1,75 @@
+# Copilot 全域產生與編輯規範（YAML 版）
+# 用於 Agent / Chat / Inline 模式
+# 建議放置於 .github/copilot-instructions.md
+
+description: "全域 Copilot / VS Code Agent 專案產生與編輯規範"
+applyTo: "**/*"
+
+extends:
+  common: ".github/copilot-common.md"
+  vocabulary: ".github/copilot-vocabulary.yaml"
+
+global:
+  purpose: "確保所有 Copilot 產出內容可編譯、可維護，並符合專案風格"
+  indentation: "1 Tab = 2 spaces"
+  comment_language: "English by default; add zh-TW when explaining intent or risks"
+  ascii_only: true
+  emoji_allowed: false
+
+rules:
+  - name: "General Principles"
+    details:
+      - "產出內容需可直接執行或編譯（非片段）"
+      - "保留現有專案結構與命名慣例"
+      - "修改時應延續風格，而非覆蓋"
+      - "禁止生成多餘的 LICENSE、README 或重複段落"
+      - "所有程式碼須通過編譯器、linter 與 formatter 驗證"
+      - "預設英文註解，必要時補充繁中翻譯"
+      - "禁止使用 emoji、裝飾符號或非 ASCII 控制字元"
+      - "縮排規範：使用 1 個 Tab，等同 2 空白"
+
+  - name: "File Handling"
+    details:
+      - "若目標檔案已存在，只修改必要區塊"
+      - "不可重複新增 package、module 或 import 區段"
+      - "重寫檔案時需保留原 package/module 名稱"
+      - "檔案開頭保留標準註解或版權資訊"
+      - "修改多檔案時，需附上摘要與目的說明"
+
+  - name: "Intelligent Generation Behavior"
+    details:
+      - "優先採用語言原生庫與標準解法"
+      - "不引入外部依賴，除非具明確需求與維護性"
+      - "程式碼應模組化，避免全域變數與過長函式"
+      - "生成新類別或函式時，需附最小可行範例"
+      - "配置檔（YAML/JSON）需保留縮排與格式（1 Tab = 2 spaces）"
+      - "術語與命名遵循 .github/standards/copilot-vocabulary.yaml；如與既有命名衝突，需在變更說明提供過渡策略"
+
+  - name: "Documentation and Comments"
+    details:
+      - "註解應描述『為何』而非『怎麼做』"
+      - "文件需與程式變更同步更新"
+      - "註解語言統一為英文，必要時補繁中"
+      - "生成的文件需簡潔、可被編譯或渲染"
+
+  - name: "Specialized Language Instructions"
+    references:
+      go: "go.instructions.md"
+
+
+vocabulary_reference:
+  note: "本檔不內嵌詞彙映射；統一引用 .github/standards/copilot-vocabulary.yaml（forbidden / preferred / mapping / normalization 以該檔為準）。"
+
+validation:
+  checklist:
+    - "確認程式碼可編譯 / 可執行"
+    - "格式化一致（1 Tab = 2 空白）"
+    - "保留原始 header、license、註解"
+    - "無未使用變數或匯入"
+    - "語意與既有邏輯一致"
+    - "文件同步更新"
+
+placement:
+  recommended_path: ".github/standards/copilot-instructions.yaml"
+  related_files:
+    - ".github/instructions/go.instructions.md"

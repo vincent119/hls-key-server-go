@@ -1,3 +1,5 @@
+
+// Package routes provides HTTP route handlers including health checks.
 package routes
 
 import (

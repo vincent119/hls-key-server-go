@@ -1,6 +1,6 @@
 package configs
 
-// version get
+// Version returns the application version.
 // @Summary Get version
 // @Description Get version
 // @Tags Version

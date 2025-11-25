@@ -19,7 +19,7 @@
 
 ## 📁 專案架構
 
-```
+```bash
 hls-key-server-go/
 ├── cmd/
 │   └── server/              # 應用程式進入點
@@ -186,7 +186,7 @@ curl -X POST "http://localhost:9090/api/v1/hls/key" \
 
 **回應**：
 
-```
+```bash
 HTTP/1.1 200 OK
 Content-Type: application/octet-stream
 Content-Length: 16

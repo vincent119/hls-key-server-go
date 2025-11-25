@@ -40,6 +40,8 @@ import (
 	"hls-key-server-go/internal/apperrors"
 	"hls-key-server-go/internal/configs"
 	"hls-key-server-go/internal/handler"
+	"hls-key-server-go/internal/handler/middleware"
+	"hls-key-server-go/internal/pkg/metrics"
 	"hls-key-server-go/internal/repository"
 	v1 "hls-key-server-go/internal/routes/api/v1"
 	"hls-key-server-go/internal/service"
@@ -67,6 +69,9 @@ func run() error {
 		_ = logger.Sync()
 	}()
 
+	// Initialize metrics
+	metrics.Init(cfg.App.Version, cfg.App.Mode)
+
 	// Initialize repository
 	keyRepo, err := repository.NewFileKeyRepository("./keys")
 	if err != nil {
@@ -84,6 +89,7 @@ func run() error {
 	// Initialize handlers
 	hlsHandler := handler.NewHLSHandler(hlsService, logger)
 	authHandler := handler.NewAuthHandler(authService, &cfg.JwtSecret, logger)
+	metricsHandler := handler.NewMetricsHandler(cfg, logger)
 
 	// Generate test token for development
 	if cfg.App.Mode != "production" {
@@ -104,7 +110,7 @@ func run() error {
 	}
 
 	// Create router using new architecture
-	router := setupRouter(cfg, hlsHandler, authHandler)
+	router := setupRouter(cfg, hlsHandler, authHandler, metricsHandler)
 
 	// Create HTTP server
 	serverAddr := ":" + cfg.App.Port
@@ -177,17 +183,18 @@ func initLogger(mode string) (*zap.Logger, error) {
 }
 
 // setupRouter creates and configures the Gin router with new handlers
-func setupRouter(cfg *configs.Config, hlsHandler *handler.HLSHandler, authHandler *handler.AuthHandler) *gin.Engine {
+func setupRouter(cfg *configs.Config, hlsHandler *handler.HLSHandler, authHandler *handler.AuthHandler, metricsHandler *handler.MetricsHandler) *gin.Engine {
 	// Create Gin instance
 	router := gin.New()
 
 	// Setup middleware
 	router.Use(gin.Recovery())
 	router.Use(gin.Logger())
+	router.Use(middleware.PrometheusMiddleware())
 
 	// API v1 routes
 	v1Group := router.Group("/api/v1")
-	routeGroups := v1.GetRouteGroups(hlsHandler, authHandler)
+	routeGroups := v1.GetRouteGroups(hlsHandler, authHandler, metricsHandler)
 	for _, routeGroup := range routeGroups {
 		routeGroup.RegisterRoutes(v1Group)
 	}

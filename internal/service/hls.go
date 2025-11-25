@@ -4,9 +4,11 @@ package service
 import (
 	"context"
 
+	"github.com/prometheus/client_golang/prometheus"
 	"go.uber.org/zap"
 
 	"hls-key-server-go/internal/apperrors"
+	"hls-key-server-go/internal/pkg/metrics"
 	"hls-key-server-go/internal/repository"
 )
 
@@ -41,14 +43,23 @@ func (s *HLSService) GetKey(ctx context.Context, keyName string) ([]byte, error)
 
 // ListKeys returns all available key names
 func (s *HLSService) ListKeys(ctx context.Context) []string {
-	return s.keyRepo.List(ctx)
+	keys := s.keyRepo.List(ctx)
+	metrics.ActiveKeys.Set(float64(len(keys)))
+	return keys
 }
 
 // ReloadKeys reloads all keys from storage
 func (s *HLSService) ReloadKeys(ctx context.Context) error {
+	timer := prometheus.NewTimer(metrics.KeyReloadDuration)
+	defer timer.ObserveDuration()
+
 	if err := s.keyRepo.Reload(ctx); err != nil {
 		return apperrors.Wrap(err, "reload keys")
 	}
+
+	// Update active keys count
+	keys := s.keyRepo.List(ctx)
+	metrics.ActiveKeys.Set(float64(len(keys)))
 
 	s.logger.Info("keys reloaded successfully")
 	return nil

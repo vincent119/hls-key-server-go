@@ -11,9 +11,10 @@ import (
 // @Summary Get all route groups
 // @Description Get all route groups
 // @Tags Route
-func GetRouteGroups(hlsHandler *handler.HLSHandler, authHandler *handler.AuthHandler) []interface{ RegisterRoutes(*gin.RouterGroup) } {
+func GetRouteGroups(hlsHandler *handler.HLSHandler, authHandler *handler.AuthHandler, metricsHandler *handler.MetricsHandler) []interface{ RegisterRoutes(*gin.RouterGroup) } {
 	return []interface{ RegisterRoutes(*gin.RouterGroup) }{
 		NewHlsKeyRoute(hlsHandler),
 		NewAuthRoutes(authHandler),
+		NewMetricsRoute(metricsHandler),
 	}
 }

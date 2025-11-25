@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 
 	"hls-key-server-go/internal/apperrors"
+	"hls-key-server-go/internal/pkg/metrics"
 	"hls-key-server-go/internal/service"
 )
 
@@ -55,6 +56,8 @@ func (h *HLSHandler) GetKey(c *gin.Context) {
 
 	keyData, err := h.service.GetKey(c.Request.Context(), keyName)
 	if err != nil {
+		metrics.KeyRequestsTotal.WithLabelValues(keyName, "error").Inc()
+		metrics.ErrorsTotal.WithLabelValues("key_retrieval").Inc()
 		h.logger.Error("failed to get key",
 			zap.String("key", keyName),
 			zap.Error(err),
@@ -73,6 +76,7 @@ func (h *HLSHandler) GetKey(c *gin.Context) {
 		return
 	}
 
+	metrics.KeyRequestsTotal.WithLabelValues(keyName, "success").Inc()
 	c.Data(http.StatusOK, "application/octet-stream", keyData)
 }
 

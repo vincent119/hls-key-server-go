@@ -9,6 +9,7 @@ import (
 
 	"hls-key-server-go/internal/apperrors"
 	"hls-key-server-go/internal/configs"
+	"hls-key-server-go/internal/pkg/metrics"
 	"hls-key-server-go/internal/service"
 )
 
@@ -52,6 +53,7 @@ func (h *AuthHandler) GenerateToken(c *gin.Context) {
 	// Validate custom header
 	headerValue := c.GetHeader(h.jwtConfig.HeaderKey)
 	if headerValue != h.jwtConfig.HeaderValue {
+		metrics.AuthAttempts.WithLabelValues("invalid_header").Inc()
 		h.logger.Warn("invalid custom header",
 			zap.String("username", username),
 			zap.String("ip", c.ClientIP()),
@@ -63,6 +65,7 @@ func (h *AuthHandler) GenerateToken(c *gin.Context) {
 
 	// Validate credentials
 	if err := h.service.ValidateCredentials(c.Request.Context(), username, h.jwtConfig.HeaderValue); err != nil{
+		metrics.AuthAttempts.WithLabelValues("invalid_credentials").Inc()
 		h.logger.Warn("invalid credentials",
 			zap.String("username", username),
 			zap.Error(err),
@@ -80,6 +83,7 @@ func (h *AuthHandler) GenerateToken(c *gin.Context) {
 	// Generate token
 	token, err := h.service.GenerateToken(c.Request.Context(), username)
 	if err != nil {
+		metrics.ErrorsTotal.WithLabelValues("token_generation").Inc()
 		h.logger.Error("failed to generate token",
 			zap.String("username", username),
 			zap.Error(err),
@@ -88,6 +92,8 @@ func (h *AuthHandler) GenerateToken(c *gin.Context) {
 		return
 	}
 
+	metrics.AuthAttempts.WithLabelValues("success").Inc()
+	metrics.TokenGenerations.Inc()
 	h.logger.Info("token generated successfully",
 		zap.String("username", username),
 	)

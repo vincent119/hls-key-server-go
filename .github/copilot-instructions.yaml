@@ -78,13 +78,10 @@ placement:
   related_files:
     - ".github/instructions/go.instructions.md"
 
-### 產出內容要求
-- 輸出 **完整可編譯檔案**或明確 **diff**。
-- diff 須使用區塊標示以保持最小修改：
-  ```
-  // ...existing code...
-  { changed code }
-  // ...existing code...
-  ```
-- 多檔變更列出：檔名 / 變更摘要 / 風險。
-- 新增外部套件需附：`go get <module>@<version>` 與風險評估。
+output_requirements:
+  description: "產出內容要求"
+  items:
+    - "輸出 **完整可編譯檔案**或明確 **diff**。"
+    - "diff 須使用區塊標示以保持最小修改：\n  // ...existing code...\n  { changed code }\n  // ...existing code..."
+    - "多檔變更列出：檔名 / 變更摘要 / 風險。"
+    - "新增外部套件需附：`go get <module>@<version>` 與風險評估。"

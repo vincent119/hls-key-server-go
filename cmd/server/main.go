@@ -115,8 +115,12 @@ func run() error {
 	// Create HTTP server
 	serverAddr := ":" + cfg.App.Port
 	server := &http.Server{
-		Addr:    serverAddr,
-		Handler: router,
+		Addr:              serverAddr,
+		Handler:           router,
+		ReadTimeout:       15 * time.Second,
+		ReadHeaderTimeout: 10 * time.Second,
+		WriteTimeout:      15 * time.Second,
+		IdleTimeout:       60 * time.Second,
 	}
 
 	// Start server in goroutine
@@ -191,6 +195,7 @@ func setupRouter(cfg *configs.Config, hlsHandler *handler.HLSHandler, authHandle
 	router.Use(gin.Recovery())
 	router.Use(gin.Logger())
 	router.Use(middleware.PrometheusMiddleware())
+	router.Use(middleware.Timeout(30 * time.Second)) // Add request timeout
 
 	// API v1 routes
 	v1Group := router.Group("/api/v1")

@@ -1,5 +1,3 @@
-
-
 // Package handler provides HTTP request handlers including metrics endpoint.
 package handler
 

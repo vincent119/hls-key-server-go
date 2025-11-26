@@ -64,7 +64,7 @@ func (h *AuthHandler) GenerateToken(c *gin.Context) {
 	}
 
 	// Validate credentials
-	if err := h.service.ValidateCredentials(c.Request.Context(), username, h.jwtConfig.HeaderValue); err != nil{
+	if err := h.service.ValidateCredentials(c.Request.Context(), username, h.jwtConfig.HeaderValue); err != nil {
 		metrics.AuthAttempts.WithLabelValues("invalid_credentials").Inc()
 		h.logger.Warn("invalid credentials",
 			zap.String("username", username),

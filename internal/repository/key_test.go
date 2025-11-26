@@ -62,8 +62,26 @@ func TestFileKeyRepository_Get(t *testing.T) {
 			wantLen: 0,
 		},
 		{
-			name:    "path traversal attempt",
-			keyName: "../etc/passwd",
+			name:    "path traversal attempt with ..",
+			keyName: "../etc/passwd.key",
+			wantErr: apperrors.ErrInvalidKeyName,
+			wantLen: 0,
+		},
+		{
+			name:    "path traversal with forward slash",
+			keyName: "dir/test.key",
+			wantErr: apperrors.ErrInvalidKeyName,
+			wantLen: 0,
+		},
+		{
+			name:    "path traversal with backslash",
+			keyName: "dir\\test.key",
+			wantErr: apperrors.ErrInvalidKeyName,
+			wantLen: 0,
+		},
+		{
+			name:    "missing .key extension",
+			keyName: "test.txt",
 			wantErr: apperrors.ErrInvalidKeyName,
 			wantLen: 0,
 		},

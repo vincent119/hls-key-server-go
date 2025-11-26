@@ -29,6 +29,53 @@ type FileKeyRepository struct {
 	mu     sync.RWMutex
 }
 
+// validateKeyName performs security validation on key filenames
+// to prevent directory traversal attacks and enforce naming conventions.
+//
+// Requirements:
+//   - Must end with .key extension
+//   - Cannot be empty
+//   - Cannot contain control characters (ASCII 0-31, 127)
+//   - Cannot contain path separators (/, \)
+//   - Cannot contain parent directory references (..)
+//   - Must remain unchanged after filepath.Clean (no manipulation)
+func validateKeyName(name string) error {
+	// Basic validation
+	if name == "" {
+		return apperrors.ErrInvalidKeyName
+	}
+	if !strings.HasSuffix(name, ".key") {
+		return apperrors.ErrInvalidKeyName
+	}
+
+	// Check for control characters (null byte, newline, etc.)
+	for _, ch := range name {
+		if ch < 32 || ch == 127 { // ASCII control characters and DEL
+			return apperrors.ErrInvalidKeyName
+		}
+	}
+
+	// Check for malicious characters before cleaning
+	if strings.Contains(name, "..") ||
+		strings.Contains(name, "/") ||
+		strings.Contains(name, "\\") {
+		return apperrors.ErrInvalidKeyName
+	}
+
+	// Clean and verify path hasn't changed
+	cleanName := filepath.Clean(name)
+	if cleanName != name {
+		return apperrors.ErrInvalidKeyName
+	}
+
+	// Ensure no directory separators remain after cleaning
+	if strings.Contains(cleanName, string(filepath.Separator)) {
+		return apperrors.ErrInvalidKeyName
+	}
+
+	return nil
+}
+
 // NewFileKeyRepository creates a new file-based key repository
 // keyDir should be an absolute or relative path to the directory containing .key files
 func NewFileKeyRepository(keyDir string) (*FileKeyRepository, error) {
@@ -56,14 +103,9 @@ func NewFileKeyRepository(keyDir string) (*FileKeyRepository, error) {
 
 // Get retrieves a key by name from cache
 func (r *FileKeyRepository) Get(_ context.Context, name string) ([]byte, error) {
-	if name == "" || !strings.HasSuffix(name, ".key") {
-		return nil, apperrors.ErrInvalidKeyName
-	}
-
-	// Clean path to prevent directory traversal
-	name = filepath.Clean(name)
-	if strings.Contains(name, "..") {
-		return nil, apperrors.ErrInvalidKeyName
+	// Validate key name to prevent directory traversal
+	if err := validateKeyName(name); err != nil {
+		return nil, err
 	}
 
 	r.mu.RLock()
@@ -75,10 +117,7 @@ func (r *FileKeyRepository) Get(_ context.Context, name string) ([]byte, error) 
 	}
 
 	// Return a copy to prevent cache mutation
-	keyCopy := make([]byte, len(key))
-	copy(keyCopy, key)
-
-	return keyCopy, nil
+	return append([]byte(nil), key...), nil
 }
 
 // List returns all available key names
@@ -103,17 +142,25 @@ func (r *FileKeyRepository) Reload(_ context.Context) error {
 	newCache := make(map[string][]byte)
 
 	for _, file := range files {
-		if file.IsDir() || !strings.HasSuffix(file.Name(), ".key") {
+		if file.IsDir() {
 			continue
 		}
 
-		keyPath := filepath.Join(r.keyDir, file.Name())
-		keyData, err := os.ReadFile(keyPath)
-		if err != nil {
-			return fmt.Errorf("read key file %s: %w", file.Name(), err)
+		fileName := file.Name()
+
+		// Apply same validation to loaded files
+		if err := validateKeyName(fileName); err != nil {
+			// Skip invalid files but continue loading other keys
+			continue
 		}
 
-		newCache[file.Name()] = keyData
+		keyPath := filepath.Join(r.keyDir, fileName)
+		keyData, err := os.ReadFile(keyPath)
+		if err != nil {
+			return fmt.Errorf("read key file %s: %w", fileName, err)
+		}
+
+		newCache[fileName] = keyData
 	}
 
 	r.mu.Lock()

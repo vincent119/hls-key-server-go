@@ -3,15 +3,15 @@
 # 建議放置於 .github/copilot-instructions.md
 
 description: "全域 Copilot / VS Code Agent 專案產生與編輯規範"
-applyTo: "**/*"
+applyTo: "**/*.go,**/*.md,**/*.yaml,**/go.mod,**/go.sum"
 
 extends:
   common: ".github/copilot-common.md"
-  vocabulary: ".github/copilot-vocabulary.yaml"
+  vocabulary: ".github/standards/copilot-vocabulary.yaml"
 
 global:
   purpose: "確保所有 Copilot 產出內容可編譯、可維護，並符合專案風格"
-  indentation: "1 Tab = 2 spaces"
+  indentation: "Use tabs; display width 2 spaces"
   comment_language: "English by default; add zh-TW when explaining intent or risks"
   ascii_only: true
   emoji_allowed: false
@@ -26,7 +26,7 @@ rules:
       - "所有程式碼須通過編譯器、linter 與 formatter 驗證"
       - "預設英文註解，必要時補充繁中翻譯"
       - "禁止使用 emoji、裝飾符號或非 ASCII 控制字元"
-      - "縮排規範：使用 1 個 Tab，等同 2 空白"
+      - "縮排規範：使用 Tab；檔尾僅保留單一換行"
 
   - name: "File Handling"
     details:
@@ -35,6 +35,7 @@ rules:
       - "重寫檔案時需保留原 package/module 名稱"
       - "檔案開頭保留標準註解或版權資訊"
       - "修改多檔案時，需附上摘要與目的說明"
+      - "提交差異須使用明確區塊標示：...existing code（保持最小修改）"
 
   - name: "Intelligent Generation Behavior"
     details:
@@ -42,7 +43,7 @@ rules:
       - "不引入外部依賴，除非具明確需求與維護性"
       - "程式碼應模組化，避免全域變數與過長函式"
       - "生成新類別或函式時，需附最小可行範例"
-      - "配置檔（YAML/JSON）需保留縮排與格式（1 Tab = 2 spaces）"
+      - "配置檔（YAML/JSON）需保留縮排與格式（Tab 顯示寬度 2 空白）"
       - "術語與命名遵循 .github/standards/copilot-vocabulary.yaml；如與既有命名衝突，需在變更說明提供過渡策略"
 
   - name: "Documentation and Comments"
@@ -54,22 +55,36 @@ rules:
 
   - name: "Specialized Language Instructions"
     references:
-      go: "go.instructions.md"
-
+      go: ".github/instructions/go.instructions.md"
 
 vocabulary_reference:
-  note: "本檔不內嵌詞彙映射；統一引用 .github/standards/copilot-vocabulary.yaml（forbidden / preferred / mapping / normalization 以該檔為準）。"
+  note: "統一引用 .github/standards/copilot-vocabulary.yaml。"
 
 validation:
   checklist:
     - "確認程式碼可編譯 / 可執行"
-    - "格式化一致（1 Tab = 2 空白）"
+    - "gofmt -s 與 goimports 皆無差異"
+    - "通過 go vet 與靜態分析（如 golangci-lint）"
+    - "單元測試通過（含 -race）；涵蓋率門檻符合專案設定"
+    - "go mod tidy 後無差異（go.mod / go.sum 一致）"
+    - "遵循 .github/instructions/go.instructions.md：context 為第一參數、errors.Is/As、imports 分群"
     - "保留原始 header、license、註解"
     - "無未使用變數或匯入"
     - "語意與既有邏輯一致"
     - "文件同步更新"
 
 placement:
-  recommended_path: ".github/standards/copilot-instructions.yaml"
+  recommended_path: ".github/copilot-instructions.yaml"
   related_files:
     - ".github/instructions/go.instructions.md"
+
+### 產出內容要求
+- 輸出 **完整可編譯檔案**或明確 **diff**。
+- diff 須使用區塊標示以保持最小修改：
+  ```
+  // ...existing code...
+  { changed code }
+  // ...existing code...
+  ```
+- 多檔變更列出：檔名 / 變更摘要 / 風險。
+- 新增外部套件需附：`go get <module>@<version>` 與風險評估。

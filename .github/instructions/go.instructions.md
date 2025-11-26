@@ -1,6 +1,6 @@
 ---
 description: 'Go 開發與 Copilot/Agent 產生規範指引（整合 Uber Go Style Guide）'
-applyTo: '**/*.go,**/go.mod,**/go.sum'
+applyTo: "**/*.go,**/*.md,**/*.yaml,**/go.mod,**/go.sum"
 ---
 
 # Go 開發與 Copilot / Agent 指南（整合 Uber Guide 版本）
@@ -39,7 +39,8 @@ applyTo: '**/*.go,**/go.mod,**/go.sum'
 - 僅在**不可恢復初始化**時用 `panic`；避免在 library 使用。
 - 禁止「只記錄不回傳」導致錯誤吞沒；**記錄與回傳擇一**，以邏輯層級決定。
 
-### 並行與 I/O 安全
+
+### 並行與 I/O 安全 區塊
 - 每個 goroutine 需有**退出機制**（`context`、`WaitGroup` 或關閉 channel）。
 - Channel 緩衝預設 0 或 1（除非有量測證據）。
 - 嚴禁 goroutine 泄漏；資源關閉要落在呼叫點 `defer Close()`。
@@ -60,7 +61,7 @@ applyTo: '**/*.go,**/go.mod,**/go.sum'
 - 方法介面：
   - 皆接收 `context.Context`。
   - 內部建 `http.Request` → `c.httpClient.Do(req)` → `defer resp.Body.Close()`。
-  - 要求**逾時/重試/回退**策略明確（見「Net/HTTP 實務」）。
+  - 要求**逾時/重試/回退**策略明確（見「Net/HTTP 實務」）。 // 補齊句點與參照
 
 ### JSON / Struct Tag
 - 對外型別欄位加上 `json,yaml,mapstructure` tags；**選填**欄位 `omitempty`。
@@ -71,7 +72,22 @@ applyTo: '**/*.go,**/go.mod,**/go.sum'
   ```
 - 使用 `any` 取代 `interface{}`；但優先具體型別。
 - 時間欄位採 **RFC3339**（UTC 優先）；必要時標注本地時區偏差。
-
+### Net/HTTP 實務
+- **重用 Transport**，設定逾時：
+  ```go
+  tr := &http.Transport{
+      MaxIdleConns:        100,
+      IdleConnTimeout:     90 * time.Second,
+      TLSHandshakeTimeout: 10 * time.Second,
+      ExpectContinueTimeout: 1 * time.Second,
+  }
+  c := &http.Client{
+      Transport: tr,
+      Timeout:   15 * time.Second, // 全域上限；更細粒度以 context 控制
+  }
+  ```
+- 明確重試策略（**僅**冪等方法），具退避與上限；對 5xx/網路錯誤重試，對業務 4xx 不重試。
+- 嚴格 `resp.Body.Close()`；讀取前先檢 HTTP 狀態碼。
 ### 測試與範例
 - 採 **table-driven tests**；子測試用 `t.Run`。
 - 輔助函式 `t.Helper()`；清理用 `t.Cleanup()`。

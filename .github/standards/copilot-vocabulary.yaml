@@ -1,0 +1,571 @@
+# =============================================================================
+#  Copilot 詞彙對應檔（.github/copilot-vocabulary.yaml）
+#  目的：提供中英術語的一致映射、禁用詞、偏好詞，以及大小寫／標點／單位寫法規範。
+#  使用：所有說明檔、註解、PR 範本與 Copilot 規範應引用本檔。若有衝突以本檔為準。
+# =============================================================================
+
+schemaVersion: 1 # ← 若有結構變更請遞增
+meta:
+  owner: "Architecture Team" # ← 維護者團隊／責任人
+  lastUpdated: "2025-11-26" # ← 更新日期（YYYY-MM-DD）
+  locale: "zh-Hant-TW" # ← 採用繁體中文（台灣習慣）
+  canonical: true # ← 此檔為所有生成用詞的唯一權威來源
+  scope:
+    - docs # ← 文件／說明
+    - comments # ← 程式碼註解
+    - commit # ← Commit／PR 標題與說明
+    - ui-copy # ← 介面文案
+  precedence: # ← 套用優先序（前者優先）
+    - forbidden
+    - preferred
+    - mapping
+  note: >
+    本檔只規範「文字用語」。語言／工具格式化（如 gofmt、prettier）依各語言專用檔。
+    Copilot / Agent 生成與 PR 文件應優先採用本檔用詞；若與既有命名衝突，遵循 conflicts.policy。
+
+# -----------------------------------------------------------------------------
+#  全域規範（大小寫、標點、數字與單位、專有名詞）
+# -----------------------------------------------------------------------------
+conventions:
+  casing:
+    # 英文專有名詞大小寫規範
+    properNouns:
+      - term: "GitHub"
+      - term: "Git"
+      - term: "Go"
+      - term: "Kubernetes"
+      - term: "Prometheus"
+      - term: "Grafana"
+      - term: "VictoriaMetrics"
+      - term: "AWS"
+      - term: "CloudFront"
+      - term: "WAFv2"
+      - term: "VPC"
+      - term: "EKS"
+      - term: "S3"
+      - term: "IAM"
+      - term: "KMS"
+    # 縮寫一律全大寫；提及變數／函式名時維持原始大小寫
+    acronymsUppercase: [API, HTTP, HTTPS, TLS, JWT, CPU, GPU, RAM, SLA, SLO, SLI, CI, CD, OSS]
+    keepCodeIdentifierCase: true # 程式識別字（e.g., DoHTTP, http.Client）保持原樣字面
+
+  punctuation:
+    # 中文內文用「全形中文標點」，但凡涉及程式碼、參數、檔名、指令等，使用「半形英文符號」
+    chineseFullWidthInProse: true
+    asciiInTechTokens: true
+    # 中英文之間以半形空白分隔（例：使用 Go context；部署到 AWS）
+    spacingBetweenZhEn: true
+
+  numbersAndUnits:
+    # 數字採半形；單位採 SI 或約定縮寫；數字與單位間保留半形空白（例：10 ms, 64 MiB）
+    asciiDigits: true
+    spaceBetweenNumberAndUnit: true
+    unitStyle:
+      binary: [KiB, MiB, GiB]
+      time: [ns, μs, ms, s, min, h]
+      percent: "%"
+      requestsPerSecond: "req/s"
+
+  nounsForFS:
+    # 檔案系統名詞：程式語境用「目錄」；UI 對一般使用者可用「資料夾」
+    directoryInCode: "目錄"
+    folderInUI: "資料夾"
+
+  tone:
+    # 文案口吻：專業、簡潔、避免感嘆；禁止口語化 Emoji
+    professional: true
+    forbidEmoji: true
+
+# -----------------------------------------------------------------------------
+#  禁用詞（forbidden）：掃描到即改；若 mapping 中另有指定，依 mapping 替換
+# -----------------------------------------------------------------------------
+forbidden:
+  - 創建 # 改用「建立」
+  - 創立 # 依脈絡多為「成立」或「建立」
+  - 介面 # 技術脈絡指 interface 時，優先用「介面（interface）」或「介面型別」
+  - 例外 # exception 應譯「例外狀況」；Go 多用「錯誤」
+  - 參數值 # 冗語，視情況用「參數」或「值」
+  - 物件導向 # 盡量具體化，如「類別／介面／多型」
+  - 併發處理 # 建議用「並行」或「並發」（依語境，下方有 mapping）
+  - 線程 # 採「執行緒」
+  - 變更集 # 通常用「變更」或「差異（diff）」
+  - 打包 # build/packaging 請明確「建置／封裝」
+  - 偵錯 # 使用「除錯」
+
+# -----------------------------------------------------------------------------
+#  偏好詞（preferred）：多個同義時，統一為以下用語
+# -----------------------------------------------------------------------------
+preferred:
+  build: "建置" # compile/build 均用「建置」
+  packaging: "封裝"
+  directory: "目錄"
+  folder: "資料夾"
+  create: "建立"
+  update: "更新"
+  delete: "刪除"
+  remove: "移除"
+  add: "新增"
+  enable: "啟用"
+  disable: "停用"
+  request: "請求"
+  response: "回應"
+  error: "錯誤"
+  exception: "例外狀況"
+  panic: "恐慌（panic）" # Go 特有；保留英文字
+  concurrency: "並行" # 計算任務同步進行，多以 goroutine 脈絡
+  parallelism: "平行度"
+  thread: "執行緒"
+  process: "行程"
+  performance: "效能"
+  throughput: "吞吐量"
+  latency: "延遲"
+  availability: "可用性"
+  reliability: "可靠性"
+  tracing: "追蹤"
+  logging: "日誌"
+  metrics: "度量"
+  rate-limit: "速率限制"
+  backoff: "退避"
+  retry: "重試"
+  idempotent: "冪等"
+  feature-flag: "功能旗標"
+  rollout: "推出"
+  rollback: "回滾"
+  canary: "金絲雀發布"
+  blue-green: "藍綠部署"
+
+# -----------------------------------------------------------------------------
+#  核心對應（mapping）：逐條術語映射；可依專案擴充
+#  - en: 英文術語或短語（支援正規化比對）
+#  - zh: 主要譯法（預設採用）
+#  - also: 可接受的次選詞（盡量少）
+#  - avoid: 禁用或不建議用法（被 forbidden 亦會列在此便於審閱）
+#  - notes: 補充說明與使用情境
+# -----------------------------------------------------------------------------
+mapping:
+  # --- 通用動詞 ---
+  - en: "create"
+    zh: "建立"
+    avoid: ["創建", "創立"]
+    notes: "建立資源／物件時一律用『建立』。如：建立 S3 Bucket。"
+
+  - en: "update"
+    zh: "更新"
+    notes: "小幅調整或覆寫屬性皆為『更新』。"
+
+  - en: "delete"
+    zh: "刪除"
+    also: ["移除"] # 移除偏向從集合中拿掉，不一定銷毀
+    notes: "具破壞性動作以『刪除』為主；從清單移除可用『移除』。"
+
+  - en: "add"
+    zh: "新增"
+    notes: "向集合／清單加入元素、增加欄位等。"
+
+  - en: "remove"
+    zh: "移除"
+    notes: "從集合移除、不保證銷毀底層資源。"
+
+  - en: "enable"
+    zh: "啟用"
+  - en: "disable"
+    zh: "停用"
+
+  # --- 程式設計（Go／一般語言） ---
+  - en: "object"
+    zh: "物件"
+    notes: "一般語義使用『物件』；Go 結構以『結構體（struct）』稱呼。"
+
+  - en: "struct"
+    zh: "結構體（struct）"
+
+  - en: "interface"
+    zh: "介面（interface）"
+    avoid: ["介面"] # 純中文易與 UI 介面混淆
+    notes: "首次出現加註（interface），其後可省略括號視段落而定。"
+
+  - en: "method"
+    zh: "方法"
+
+  - en: "function"
+    zh: "函式"
+
+  - en: "module"
+    zh: "模組"
+
+  - en: "package"
+    zh: "套件（package）"
+    notes: "指 Go package 時可直接寫『package』，但中文敘述用『套件』。"
+
+  - en: "library"
+    zh: "函式庫"
+
+  - en: "dependency"
+    zh: "相依套件"
+
+  - en: "version"
+    zh: "版本"
+
+  - en: "semantic versioning"
+    zh: "語意化版本"
+
+  - en: "nil|null"
+    zh: "空值"
+
+  - en: "pointer"
+    zh: "指標"
+
+  - en: "reference"
+    zh: "參照"
+
+  - en: "slice"
+    zh: "切片"
+
+  - en: "array"
+    zh: "陣列"
+
+  - en: "map"
+    zh: "映射（map）"
+
+  - en: "channel"
+    zh: "通道（channel）"
+
+  - en: "goroutine"
+    zh: "goroutine" # 專有名詞不譯
+
+  - en: "context"
+    zh: "context" # 專術語不譯；附帶說明：期限／取消訊號
+    notes: "首次出現可補述『具截止時間與取消訊號的執行脈絡』。"
+
+  - en: "error wrapping"
+    zh: "錯誤包裹（wrapping）"
+
+  - en: "sentinel error"
+    zh: "哨兵錯誤"
+
+  - en: "panic"
+    zh: "恐慌（panic）"
+
+  - en: "unit test"
+    zh: "單元測試"
+
+  - en: "integration test"
+    zh: "整合測試"
+
+  - en: "benchmark"
+    zh: "基準測試"
+
+  - en: "linter"
+    zh: "程式碼靜態檢查工具（linter）"
+
+  - en: "formatter"
+    zh: "格式化工具"
+
+  - en: "pipeline"
+    zh: "管線（pipeline）"
+
+  - en: "repository"
+    zh: "版本庫（repository）"
+
+  - en: "branch"
+    zh: "分支"
+
+  - en: "tag"
+    zh: "標籤"
+
+  - en: "commit"
+    zh: "提交（commit）"
+
+  - en: "merge"
+    zh: "合併"
+
+  - en: "rebase"
+    zh: "重置基底（rebase）"
+
+  - en: "pull request|merge request"
+    zh: "拉取請求（PR）"
+
+  - en: "issue"
+    zh: "議題（issue）"
+
+  - en: "code review"
+    zh: "程式碼審查"
+
+  - en: "feature flag"
+    zh: "功能旗標"
+
+  - en: "idempotent"
+    zh: "冪等"
+
+  # --- SRE／效能／可靠度 ---
+  - en: "throughput"
+    zh: "吞吐量"
+
+  - en: "latency"
+    zh: "延遲"
+
+  - en: "p99|p95"
+    zh: "p99|p95" # 分位數不譯
+
+  - en: "availability"
+    zh: "可用性"
+
+  - en: "reliability"
+    zh: "可靠性"
+
+  - en: "SLA"
+    zh: "SLA" # 名詞不譯
+
+  - en: "SLO"
+    zh: "SLO"
+
+  - en: "SLI"
+    zh: "SLI"
+
+  - en: "observability"
+    zh: "可觀測性"
+
+  - en: "logging"
+    zh: "日誌"
+
+  - en: "metrics"
+    zh: "度量"
+
+  - en: "tracing"
+    zh: "追蹤"
+
+  - en: "rate limit"
+    zh: "速率限制"
+
+  - en: "retry"
+    zh: "重試"
+
+  - en: "backoff"
+    zh: "退避"
+
+  - en: "circuit breaker"
+    zh: "斷路器"
+
+  - en: "throttling"
+    zh: "節流"
+
+  - en: "bottleneck"
+    zh: "瓶頸"
+
+  # --- 事件／營運 ---
+  - en: "alert"
+    zh: "警示"
+
+  - en: "dashboard"
+    zh: "儀表板"
+
+  - en: "incident"
+    zh: "事故事件"
+
+  - en: "postmortem"
+    zh: "事後檢討報告"
+
+  - en: "root cause"
+    zh: "根因"
+
+  - en: "mitigation"
+    zh: "緩解措施"
+
+  - en: "deprecation"
+    zh: "棄用"
+
+  - en: "breaking change"
+    zh: "不相容變更"
+
+  - en: "backward compatibility"
+    zh: "向下相容性"
+
+  - en: "forward compatibility"
+    zh: "向前相容性"
+
+  # --- 資料與結構 ---
+  - en: "schema"
+    zh: "結構描述（schema）"
+
+  - en: "migration"
+    zh: "資料遷移"
+
+  - en: "id"
+    zh: "ID" # 身分識別碼不譯，大寫
+
+  - en: "namespace"
+    zh: "命名空間"
+
+  - en: "serialization"
+    zh: "序列化"
+
+  - en: "deserialization"
+    zh: "反序列化"
+
+  # --- 雲端與 Kubernetes / AWS ---
+  - en: "cluster"
+    zh: "叢集"
+
+  - en: "node"
+    zh: "節點"
+
+  - en: "namespace (k8s)"
+    zh: "命名空間（Namespace）"
+
+  - en: "pod"
+    zh: "Pod" # K8s 資源名不譯且維持大小寫
+
+  - en: "deployment"
+    zh: "Deployment"
+
+  - en: "service"
+    zh: "Service"
+
+  - en: "ingress"
+    zh: "Ingress"
+
+  - en: "helm chart"
+    zh: "Helm Chart"
+
+  - en: "values file"
+    zh: "values.yaml"
+
+  - en: "kubeconfig"
+    zh: "kubeconfig"
+
+  - en: "CloudFront"
+    zh: "CloudFront"
+
+  - en: "WAFv2"
+    zh: "WAFv2"
+
+  - en: "VPC"
+    zh: "VPC"
+
+  - en: "subnet"
+    zh: "子網路（Subnet）"
+
+  - en: "security group"
+    zh: "安全性群組（SG）"
+
+  - en: "IAM role"
+    zh: "IAM 角色"
+
+  - en: "policy"
+    zh: "原則（Policy）"
+
+  - en: "KMS"
+    zh: "KMS"
+
+  - en: "S3 bucket"
+    zh: "S3 儲存貯體（Bucket）"
+
+  - en: "EKS"
+    zh: "EKS"
+
+# -----------------------------------------------------------------------------
+#  取代規則（normalization）：在文案掃描時可採此建議轉換
+#  - pattern: 正規表示式（針對中文字面／英文字面）
+#  - replace: 建議替換詞
+#  - reason: 說明為何要替換
+#  注意：此區為「建議」層級，實際落地可由 CI linter or 文案檢查器實作。
+# -----------------------------------------------------------------------------
+normalization:
+  - pattern: "創建"
+    replace: "建立"
+    reason: "統一動詞用法，避免中陸台差異字詞混用。"
+
+  - pattern: "例外(?!狀況)"
+    replace: "例外狀況"
+    reason: "避免過度簡寫，提升精確性。"
+
+  - pattern: "線程"
+    replace: "執行緒"
+    reason: "採台灣常用術語。"
+
+  - pattern: "偵錯"
+    replace: "除錯"
+    reason: "統一用語。"
+
+  - pattern: "打包"
+    replace: "建置"
+    reason: "中文語境常把 build 誤寫為打包，統一為建置（封裝為 packaging）。"
+
+  - pattern: "目錄/資料夾"
+    replace: "目錄"
+    reason: "程式語境預設用『目錄』；UI 文字另以『資料夾』。"
+
+# -----------------------------------------------------------------------------
+#  寫作示例（examples）：供參考；不參與機器比對
+# -----------------------------------------------------------------------------
+examples:
+  - bad: "創建一個 S3 bucket 並打包程式。"
+    good: "建立一個 S3 儲存貯體（Bucket），並建置程式。"
+
+  - bad: "此介面會回傳例外。"
+    good: "此介面（interface）在錯誤情境下回傳錯誤；非預期崩潰則為恐慌（panic）。"
+
+  - bad: "增加重試與退避機制以提升吞吐。"
+    good: "新增重試與退避（backoff）機制以提升吞吐量，並將 p99 延遲降至 120 ms。"
+
+# -----------------------------------------------------------------------------
+#  擴充指引（how-to-extend）：新增詞彙時遵循以下規則
+# -----------------------------------------------------------------------------
+extendGuidelines:
+  - "新增前先搜尋是否已有近義詞；避免重複。"
+  - "專有名詞（產品／資源名）盡量不譯；若需中文，首次出現採『中文（英文）』。"
+  - "動詞優先精準、短字；避免華麗冗語。"
+  - "變更既有映射屬重大變更，需 PR 與共識並更新 lastUpdated。"
+  - "若與特定語言專用檔衝突，開 PR 說明案例與取捨，並統一到本檔。"
+constraints:
+  language:
+    primary: "English"
+    secondary: "zh-TW (comments only)"
+  ascii_only: true
+  emoji_allowed: false
+
+groups:
+  http:
+    - term: "HTTP client"
+      prefer: "HTTP client"
+      goNaming:
+        type: "Client"
+        package: "client"
+    - term: "transport reuse"
+      prefer: "transport reuse"
+      notes: "Reuse *http.Transport, set timeouts"
+
+  security:
+    - term: "HLS key"
+      prefer: "HLS key"
+      goNaming:
+        type: "Key"
+        field: "key"
+      avoid: ["金鑰", "HLS金鑰"] # 統一英文；中文僅於註解
+
+  auth:
+    - term: "access token"
+      prefer: "access token"
+      goNaming:
+        type: "AccessToken"
+        field: "accessToken"
+      avoid: ["token", "accessTokenString"]
+
+  errors:
+    - term: "not found"
+      prefer: "not found"
+      goNaming:
+        const: "ErrNotFound"
+      style: "lowercase message, no punctuation"
+
+  observability:
+    - term: "trace id"
+      prefer: "trace_id"
+      goNaming:
+        field: "traceID"
+      notes: "structured logging field; zap preferred"
+conflicts:
+  policy:
+    - "Use vocabulary over existing names when conflict occurs."
+    - "Provide alias for 1 release; mark deprecated in changelog."
+    - "Add migration note in PR description and README."
